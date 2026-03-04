@@ -31,6 +31,23 @@
       <dt>Last Checked</dt>
       <dd>{{.LastChecked}}</dd>
     </div>
+    <div class="stat stat--full">
+      <dt>Total Checks</dt>
+      <dd>{{.TotalChecks}}</dd>
+    </div>
   </dl>
+  {{if .History}}
+  <div class="uptime-bar">
+    <div class="uptime-bar-segments">
+      {{range .History}}
+      <div class="uptime-seg uptime-seg--{{.Color}}" title="{{.Tooltip}}"></div>
+      {{end}}
+    </div>
+    <div class="uptime-bar-labels">
+      <span>30d ago</span>
+      <span>Today</span>
+    </div>
+  </div>
+  {{end}}
 </article>
 {{end}}

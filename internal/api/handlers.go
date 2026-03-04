@@ -20,6 +20,13 @@ type serviceView struct {
 	AvgResponseMs string
 	LastChecked   string
 	HasData       bool
+	TotalChecks   string
+	History       []segmentView
+}
+
+type segmentView struct {
+	Color   string // "up", "down", or "no-data"
+	Tooltip string // e.g. "Mar 01 · 99.5% · 288 checks"
 }
 
 func toView(s db.ServiceSummary) serviceView {
@@ -27,6 +34,28 @@ func toView(s db.ServiceSummary) serviceView {
 		Name: s.Name,
 		URL:  s.URL,
 		IsUp: s.IsUp,
+	}
+
+	v.TotalChecks = fmt.Sprintf("%d checks", s.TotalChecks)
+	v.History = make([]segmentView, len(s.History))
+	for i, b := range s.History {
+		label := b.Date.Format("Jan 02")
+		if !b.HasData {
+			v.History[i] = segmentView{Color: "no-data", Tooltip: label + " · no data"}
+			continue
+		}
+		var pct float64
+		if b.TotalChecks > 0 {
+			pct = float64(b.UpChecks) / float64(b.TotalChecks) * 100
+		}
+		color := "down"
+		if pct >= 90.0 {
+			color = "up"
+		}
+		v.History[i] = segmentView{
+			Color:   color,
+			Tooltip: fmt.Sprintf("%s · %.1f%% · %d checks", label, pct, b.TotalChecks),
+		}
 	}
 
 	if s.LastChecked.IsZero() {

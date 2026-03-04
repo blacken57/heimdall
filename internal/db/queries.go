@@ -16,6 +16,16 @@ type ServiceSummary struct {
 	LastChecked   time.Time
 	StatusCode    int
 	ErrorMessage  string
+	TotalChecks   int
+	History       []DayBucket // 30 entries, index 0 = oldest
+}
+
+// DayBucket holds per-day uptime data for the history bar.
+type DayBucket struct {
+	Date        time.Time
+	TotalChecks int
+	UpChecks    int
+	HasData     bool
 }
 
 // UpsertService inserts or updates a service by name, returning its id.
@@ -98,6 +108,11 @@ func (d *DB) GetAllServiceSummaries() ([]ServiceSummary, error) {
 		if err := d.fillStats(&summaries[i]); err != nil {
 			return nil, err
 		}
+		hist, err := d.GetCheckHistory(summaries[i].ID, 30)
+		if err != nil {
+			return nil, err
+		}
+		summaries[i].History = hist
 	}
 	return summaries, nil
 }
@@ -150,7 +165,61 @@ func (d *DB) fillStats(s *ServiceSummary) error {
 	if avgMs.Valid {
 		s.AvgResponseMs = avgMs.Float64
 	}
+
+	err = d.conn.QueryRow(
+		`SELECT COUNT(*) FROM checks WHERE service_id = ?`, s.ID,
+	).Scan(&s.TotalChecks)
+	if err != nil {
+		return err
+	}
 	return nil
+}
+
+// GetCheckHistory returns per-day uptime buckets for the last `days` days.
+func (d *DB) GetCheckHistory(serviceID int64, days int) ([]DayBucket, error) {
+	now := time.Now().UTC()
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
+	cutoff := today.AddDate(0, 0, -(days - 1))
+
+	rows, err := d.conn.Query(`
+		SELECT date(checked_at) AS day,
+		       COUNT(*) AS total,
+		       SUM(CASE WHEN is_up THEN 1 ELSE 0 END) AS up_count
+		FROM   checks
+		WHERE  service_id = ? AND checked_at >= ?
+		GROUP  BY day ORDER BY day ASC`,
+		serviceID, cutoff)
+	if err != nil {
+		return nil, err
+	}
+	type dbRow struct{ total, up int }
+	dbData := make(map[string]dbRow)
+	for rows.Next() {
+		var dayStr string
+		var r dbRow
+		if err := rows.Scan(&dayStr, &r.total, &r.up); err != nil {
+			rows.Close()
+			return nil, err
+		}
+		dbData[dayStr] = r
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	buckets := make([]DayBucket, days)
+	for i := 0; i < days; i++ {
+		day := cutoff.AddDate(0, 0, i)
+		b := DayBucket{Date: day}
+		if r, ok := dbData[day.Format("2006-01-02")]; ok {
+			b.HasData = true
+			b.TotalChecks = r.total
+			b.UpChecks = r.up
+		}
+		buckets[i] = b
+	}
+	return buckets, nil
 }
 
 // PurgeOldChecks removes checks older than retentionDays.

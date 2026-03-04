@@ -198,3 +198,35 @@ a:hover { text-decoration: underline; }
   .card-stats   { grid-template-columns: 1fr 1fr; }
   .stat:last-child { grid-column: 1 / -1; }
 }
+
+/* ─── Stats: full-width row ─────────────────────────────────────────────── */
+.stat--full {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  padding-top: 0.4rem;
+  margin-top: 0.1rem;
+}
+.stat--full dd { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
+
+/* ─── Uptime History Bar ─────────────────────────────────────────────────── */
+.uptime-bar { display: flex; flex-direction: column; gap: 4px; }
+.uptime-bar-segments { display: flex; gap: 2px; height: 28px; }
+.uptime-seg {
+  flex: 1;
+  border-radius: 3px;
+  cursor: default;
+  transition: opacity 0.15s;
+}
+.uptime-seg:hover    { opacity: 0.75; }
+.uptime-seg--up      { background: var(--up); }
+.uptime-seg--down    { background: var(--down); }
+.uptime-seg--no-data { background: var(--surface-2); border: 1px solid var(--border); }
+.uptime-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
