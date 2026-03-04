@@ -77,20 +77,29 @@ func (d *DB) GetAllServiceSummaries() ([]ServiceSummary, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
+	// Collect all rows before closing — fillStats makes additional queries
+	// and with SetMaxOpenConns(1) we can't hold a cursor open while doing that.
 	var summaries []ServiceSummary
 	for rows.Next() {
 		var s ServiceSummary
 		if err := rows.Scan(&s.ID, &s.Name, &s.URL); err != nil {
-			return nil, err
-		}
-		if err := d.fillStats(&s); err != nil {
+			rows.Close()
 			return nil, err
 		}
 		summaries = append(summaries, s)
 	}
-	return summaries, rows.Err()
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	for i := range summaries {
+		if err := d.fillStats(&summaries[i]); err != nil {
+			return nil, err
+		}
+	}
+	return summaries, nil
 }
 
 func (d *DB) fillStats(s *ServiceSummary) error {
