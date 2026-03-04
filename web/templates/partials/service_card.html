@@ -1,0 +1,36 @@
+{{define "service_card"}}
+<article class="card {{if .HasData}}{{if .IsUp}}card--up{{else}}card--down{{end}}{{else}}card--pending{{end}}">
+  <div class="card-header">
+    <div class="card-title-row">
+      {{if .HasData}}
+        {{if .IsUp}}
+          <span class="status-dot status-dot--up" aria-label="up"></span>
+        {{else}}
+          <span class="status-dot status-dot--down" aria-label="down"></span>
+        {{end}}
+      {{else}}
+        <span class="status-dot status-dot--pending" aria-label="pending"></span>
+      {{end}}
+      <h2 class="card-name">{{.Name}}</h2>
+    </div>
+    <span class="badge badge--{{if .HasData}}{{if .IsUp}}up{{else}}down{{end}}{{else}}pending{{end}}">
+      {{.StatusBadge}}
+    </span>
+  </div>
+  <a class="card-url" href="{{.URL}}" target="_blank" rel="noopener">{{.URL}}</a>
+  <dl class="card-stats">
+    <div class="stat">
+      <dt>Uptime (24h)</dt>
+      <dd>{{.UptimePct}}</dd>
+    </div>
+    <div class="stat">
+      <dt>Avg Response</dt>
+      <dd>{{.AvgResponseMs}}</dd>
+    </div>
+    <div class="stat">
+      <dt>Last Checked</dt>
+      <dd>{{.LastChecked}}</dd>
+    </div>
+  </dl>
+</article>
+{{end}}

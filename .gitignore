@@ -1,0 +1,19 @@
+# Binaries
+heimdall
+/cmd/heimdall/heimdall
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Environment
+.env
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,9 @@
+.git
+*.db
+*.db-shm
+*.db-wal
+.env
+Dockerfile
+docker-compose.yml
+.gitignore
+.dockerignore

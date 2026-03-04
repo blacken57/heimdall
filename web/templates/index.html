@@ -1,0 +1,10 @@
+{{define "content"}}
+<section
+  id="service-list"
+  hx-get="/partials/services"
+  hx-trigger="every 30s"
+  hx-swap="outerHTML"
+>
+  {{template "service_list" .}}
+</section>
+{{end}}

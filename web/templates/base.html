@@ -1,0 +1,25 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Heimdall — Uptime Monitor</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://unpkg.com/htmx.org@2.0.4/dist/htmx.min.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <span class="logo">⚡ Heimdall</span>
+      <span class="tagline">Uptime Monitor</span>
+    </div>
+  </header>
+  <main class="container">
+    {{block "content" .}}{{end}}
+  </main>
+  <footer class="site-footer">
+    <span>Auto-refreshes every 30s</span>
+  </footer>
+</body>
+</html>
+{{end}}

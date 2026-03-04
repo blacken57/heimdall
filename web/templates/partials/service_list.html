@@ -1,0 +1,18 @@
+{{define "service_list"}}
+<section
+  id="service-list"
+  hx-get="/partials/services"
+  hx-trigger="every 30s"
+  hx-swap="outerHTML"
+>
+  {{if .}}
+  <div class="service-grid">
+    {{range .}}
+      {{template "service_card" .}}
+    {{end}}
+  </div>
+  {{else}}
+  <p class="empty-state">No services configured. Set SERVICE_1_NAME and SERVICE_1_URL.</p>
+  {{end}}
+</section>
+{{end}}
