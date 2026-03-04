@@ -2,12 +2,11 @@
 
 A lightweight, self-hosted uptime monitor built for Dokploy + Raspberry Pi (ARM). Polls your services on a configurable interval, stores results in SQLite, and serves a live dashboard — no JavaScript framework, no external dependencies, single binary.
 
-![Dashboard showing service cards with UP/DOWN status, uptime %, and response time]()
-
 ## Features
 
 - **Simple config** — define services as numbered env var pairs; no YAML or config files
 - **Live dashboard** — HTMX auto-refreshes every 30 seconds without a full page reload
+- **30-day history bar** — per-day uptime segments with hover tooltips, UptimeRobot-style
 - **ARM-native** — pure Go SQLite (`CGO_ENABLED=0`) cross-compiles to arm64/armv7 without a C toolchain
 - **Persistent history** — SQLite with WAL mode; configurable retention window
 - **Optional basic auth** — set two env vars to password-protect the dashboard
