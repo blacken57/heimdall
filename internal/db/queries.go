@@ -182,7 +182,7 @@ func (d *DB) GetCheckHistory(serviceID int64, days int) ([]DayBucket, error) {
 	cutoff := today.AddDate(0, 0, -(days - 1))
 
 	rows, err := d.conn.Query(`
-		SELECT date(checked_at) AS day,
+		SELECT substr(checked_at, 1, 10) AS day,
 		       COUNT(*) AS total,
 		       SUM(CASE WHEN is_up THEN 1 ELSE 0 END) AS up_count
 		FROM   checks
