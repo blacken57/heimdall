@@ -54,6 +54,9 @@ func Open(path string) (*DB, error) {
 		return nil, fmt.Errorf("run migrations: %w", err)
 	}
 
+	// Limit to one connection — SQLite doesn't support concurrent writers.
+	conn.SetMaxOpenConns(1)
+
 	return &DB{conn: conn}, nil
 }
 

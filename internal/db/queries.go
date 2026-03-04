@@ -61,10 +61,12 @@ func (d *DB) InsertCheck(serviceID int64, statusCode, responseMs int, isUp bool,
 	if errMsg != "" {
 		errVal = errMsg
 	}
+	// Pass checked_at explicitly from Go so the format is driver-controlled,
+	// rather than relying on SQLite's datetime('now') string format.
 	_, err := d.conn.Exec(
-		`INSERT INTO checks (service_id, status_code, response_ms, is_up, error_message)
-		 VALUES (?, ?, ?, ?, ?)`,
-		serviceID, statusCode, responseMs, isUp, errVal,
+		`INSERT INTO checks (service_id, checked_at, status_code, response_ms, is_up, error_message)
+		 VALUES (?, ?, ?, ?, ?, ?)`,
+		serviceID, time.Now().UTC(), statusCode, responseMs, isUp, errVal,
 	)
 	return err
 }
@@ -93,7 +95,7 @@ func (d *DB) GetAllServiceSummaries() ([]ServiceSummary, error) {
 
 func (d *DB) fillStats(s *ServiceSummary) error {
 	// Latest check.
-	var checkedAt sql.NullString
+	var checkedAt sql.NullTime
 	var statusCode sql.NullInt64
 	var errMsg sql.NullString
 	var isUp sql.NullBool
@@ -106,8 +108,7 @@ func (d *DB) fillStats(s *ServiceSummary) error {
 		return err
 	}
 	if checkedAt.Valid {
-		t, _ := time.Parse("2006-01-02 15:04:05", checkedAt.String)
-		s.LastChecked = t
+		s.LastChecked = checkedAt.Time
 	}
 	if statusCode.Valid {
 		s.StatusCode = int(statusCode.Int64)
@@ -120,19 +121,22 @@ func (d *DB) fillStats(s *ServiceSummary) error {
 	}
 
 	// Uptime % and avg response over last 24 hours.
-	var total, up int64
+	// Use a Go time parameter so the comparison works regardless of SQLite datetime format.
+	since := time.Now().UTC().Add(-24 * time.Hour)
+	var total int64
+	var up sql.NullInt64 // SUM returns NULL when there are no rows
 	var avgMs sql.NullFloat64
 	err = d.conn.QueryRow(`
 		SELECT COUNT(*), SUM(CASE WHEN is_up THEN 1 ELSE 0 END), AVG(response_ms)
 		FROM checks
-		WHERE service_id=? AND checked_at >= datetime('now', '-24 hours')`,
-		s.ID,
+		WHERE service_id=? AND checked_at >= ?`,
+		s.ID, since,
 	).Scan(&total, &up, &avgMs)
 	if err != nil {
 		return err
 	}
 	if total > 0 {
-		s.UptimePct = float64(up) / float64(total) * 100
+		s.UptimePct = float64(up.Int64) / float64(total) * 100
 	}
 	if avgMs.Valid {
 		s.AvgResponseMs = avgMs.Float64
@@ -142,9 +146,7 @@ func (d *DB) fillStats(s *ServiceSummary) error {
 
 // PurgeOldChecks removes checks older than retentionDays.
 func (d *DB) PurgeOldChecks(retentionDays int) error {
-	_, err := d.conn.Exec(
-		`DELETE FROM checks WHERE checked_at < datetime('now', ? || ' days')`,
-		-retentionDays,
-	)
+	cutoff := time.Now().UTC().AddDate(0, 0, -retentionDays)
+	_, err := d.conn.Exec(`DELETE FROM checks WHERE checked_at < ?`, cutoff)
 	return err
 }
