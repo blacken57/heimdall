@@ -5,14 +5,16 @@
     <span class="day-detail-title">{{.DateLabel}} — hourly breakdown</span>
     <button class="day-detail-close" onclick="document.getElementById('modal-container').innerHTML=''" aria-label="close">×</button>
   </div>
-  <div class="hourly-bar-segments">
+  <div class="hourly-list">
     {{range .Hours}}
-    <div class="hourly-seg hourly-seg--{{.Color}}" title="{{.Tooltip}}"></div>
+    <div class="hourly-row">
+      <span class="hourly-row-time">{{printf "%02d:00" .Hour}}</span>
+      <span class="hourly-row-bar-wrap">
+        <span class="hourly-row-bar hourly-row-bar--{{.Color}}" style="width:{{.BarPct}}%"></span>
+      </span>
+      <span class="hourly-row-pct hourly-row-pct--{{.Color}}">{{.Label}}</span>
+    </div>
     {{end}}
-  </div>
-  <div class="uptime-bar-labels">
-    <span>00:00</span>
-    <span>23:00</span>
   </div>
 </div>
 {{end}}

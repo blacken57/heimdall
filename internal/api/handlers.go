@@ -33,9 +33,10 @@ type segmentView struct {
 }
 
 type hourSegView struct {
-	Hour    int
-	Color   string
-	Tooltip string
+	Hour   int
+	Color  string // "up", "down", "no-data"
+	Label  string // "100.0%", "—"
+	BarPct int    // 0–100 for the inline bar width
 }
 
 type dayDetailView struct {
@@ -177,20 +178,20 @@ func (s *Server) handleDayDetail(w http.ResponseWriter, r *http.Request) {
 		Hours:     make([]hourSegView, 24),
 	}
 	for i, b := range buckets {
-		color := "no-data"
-		tooltip := fmt.Sprintf("%02d:00 · no data", b.Hour)
+		h := hourSegView{Hour: b.Hour, Color: "no-data", Label: "—", BarPct: 0}
 		if b.HasData {
 			var pct float64
 			if b.TotalChecks > 0 {
 				pct = float64(b.UpChecks) / float64(b.TotalChecks) * 100
 			}
-			color = "down"
+			h.Color = "down"
 			if pct >= 90.0 {
-				color = "up"
+				h.Color = "up"
 			}
-			tooltip = fmt.Sprintf("%02d:00 · %.1f%% · %d checks", b.Hour, pct, b.TotalChecks)
+			h.Label = fmt.Sprintf("%.1f%%", pct)
+			h.BarPct = int(pct)
 		}
-		view.Hours[i] = hourSegView{Hour: b.Hour, Color: color, Tooltip: tooltip}
+		view.Hours[i] = h
 	}
 
 	tmpl, err := template.ParseFiles("web/templates/partials/day_detail.html")
