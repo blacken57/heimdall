@@ -44,7 +44,7 @@
       <div class="uptime-seg uptime-seg--{{.Color}}"
            title="{{.Tooltip}}"
            hx-get="/partials/day-detail?service_id={{$id}}&date={{.DateStr}}"
-           hx-target="#day-detail-{{$id}}"
+           hx-target="#modal-container"
            hx-swap="innerHTML"></div>
       {{end}}
     </div>
@@ -52,7 +52,6 @@
       <span>30d ago</span>
       <span>Today</span>
     </div>
-    <div id="day-detail-{{.ID}}" class="day-detail"></div>
   </div>
   {{end}}
 </article>

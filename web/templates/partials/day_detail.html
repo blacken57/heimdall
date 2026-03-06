@@ -1,9 +1,9 @@
 {{define "day_detail"}}
-<div class="day-detail-backdrop" onclick="this.closest('.day-detail').innerHTML=''"></div>
+<div class="day-detail-backdrop" onclick="document.getElementById('modal-container').innerHTML=''"></div>
 <div class="day-detail-popup">
   <div class="day-detail-header">
     <span class="day-detail-title">{{.DateLabel}} — hourly breakdown</span>
-    <button class="day-detail-close" onclick="this.closest('.day-detail').innerHTML=''" aria-label="close">×</button>
+    <button class="day-detail-close" onclick="document.getElementById('modal-container').innerHTML=''" aria-label="close">×</button>
   </div>
   <div class="hourly-bar-segments">
     {{range .Hours}}
