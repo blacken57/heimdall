@@ -1,20 +1,18 @@
 {{define "day_detail"}}
-<div class="day-detail-panel">
+<div class="day-detail-backdrop" onclick="this.closest('.day-detail').innerHTML=''"></div>
+<div class="day-detail-popup">
   <div class="day-detail-header">
     <span class="day-detail-title">{{.DateLabel}} — hourly breakdown</span>
     <button class="day-detail-close" onclick="this.closest('.day-detail').innerHTML=''" aria-label="close">×</button>
   </div>
   <div class="hourly-bar-segments">
     {{range .Hours}}
-    <div class="hourly-seg hourly-seg--{{.Color}}" title="{{.Tooltip}}">
-      {{if eq .Hour 0}}<span class="hourly-seg-label">00</span>
-      {{else if eq .Hour 6}}<span class="hourly-seg-label">06</span>
-      {{else if eq .Hour 12}}<span class="hourly-seg-label">12</span>
-      {{else if eq .Hour 18}}<span class="hourly-seg-label">18</span>
-      {{else if eq .Hour 23}}<span class="hourly-seg-label">23</span>
-      {{else}}<span class="hourly-seg-label"></span>{{end}}
-    </div>
+    <div class="hourly-seg hourly-seg--{{.Color}}" title="{{.Tooltip}}"></div>
     {{end}}
+  </div>
+  <div class="uptime-bar-labels">
+    <span>00:00</span>
+    <span>23:00</span>
   </div>
 </div>
 {{end}}
