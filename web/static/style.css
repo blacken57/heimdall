@@ -237,13 +237,11 @@ a:hover { text-decoration: underline; }
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
   z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .day-detail-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 101;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -252,6 +250,7 @@ a:hover { text-decoration: underline; }
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 101;
 }
 .day-detail-header {
   display: flex;
