@@ -28,6 +28,14 @@ type DayBucket struct {
 	HasData     bool
 }
 
+// HourBucket holds per-hour uptime data for a single day.
+type HourBucket struct {
+	Hour        int // 0–23
+	TotalChecks int
+	UpChecks    int
+	HasData     bool
+}
+
 // UpsertService inserts or updates a service by name, returning its id.
 func (d *DB) UpsertService(name, url string) (int64, error) {
 	res, err := d.conn.Exec(
@@ -213,6 +221,48 @@ func (d *DB) GetCheckHistory(serviceID int64, days int) ([]DayBucket, error) {
 		day := cutoff.AddDate(0, 0, i)
 		b := DayBucket{Date: day}
 		if r, ok := dbData[day.Format("2006-01-02")]; ok {
+			b.HasData = true
+			b.TotalChecks = r.total
+			b.UpChecks = r.up
+		}
+		buckets[i] = b
+	}
+	return buckets, nil
+}
+
+// GetHourlyHistory returns per-hour uptime buckets for a given day (dateStr = "YYYY-MM-DD").
+func (d *DB) GetHourlyHistory(serviceID int64, dateStr string) ([]HourBucket, error) {
+	rows, err := d.conn.Query(`
+		SELECT CAST(substr(checked_at, 12, 2) AS INTEGER) AS hour,
+		       COUNT(*) AS total,
+		       SUM(CASE WHEN is_up THEN 1 ELSE 0 END) AS up_count
+		FROM   checks
+		WHERE  service_id = ? AND substr(checked_at, 1, 10) = ?
+		GROUP  BY hour ORDER BY hour ASC`,
+		serviceID, dateStr)
+	if err != nil {
+		return nil, err
+	}
+	type dbRow struct{ total, up int }
+	dbData := make(map[int]dbRow)
+	for rows.Next() {
+		var hour int
+		var r dbRow
+		if err := rows.Scan(&hour, &r.total, &r.up); err != nil {
+			rows.Close()
+			return nil, err
+		}
+		dbData[hour] = r
+	}
+	rows.Close()
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	buckets := make([]HourBucket, 24)
+	for i := 0; i < 24; i++ {
+		b := HourBucket{Hour: i}
+		if r, ok := dbData[i]; ok {
 			b.HasData = true
 			b.TotalChecks = r.total
 			b.UpChecks = r.up

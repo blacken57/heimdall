@@ -19,6 +19,7 @@ func New(cfg *config.Config, database *db.DB) *Server {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", s.handleHealth)
 	mux.HandleFunc("/partials/services", s.handlePartialServices)
+	mux.HandleFunc("/partials/day-detail", s.handleDayDetail)
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 	mux.HandleFunc("/", s.handleIndex)
 

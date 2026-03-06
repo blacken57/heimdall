@@ -39,14 +39,20 @@
   {{if .History}}
   <div class="uptime-bar">
     <div class="uptime-bar-segments">
+      {{$id := .ID}}
       {{range .History}}
-      <div class="uptime-seg uptime-seg--{{.Color}}" title="{{.Tooltip}}"></div>
+      <div class="uptime-seg uptime-seg--{{.Color}}"
+           title="{{.Tooltip}}"
+           hx-get="/partials/day-detail?service_id={{$id}}&date={{.DateStr}}"
+           hx-target="#day-detail-{{$id}}"
+           hx-swap="innerHTML"></div>
       {{end}}
     </div>
     <div class="uptime-bar-labels">
       <span>30d ago</span>
       <span>Today</span>
     </div>
+    <div id="day-detail-{{.ID}}" class="day-detail"></div>
   </div>
   {{end}}
 </article>

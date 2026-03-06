@@ -217,7 +217,7 @@ a:hover { text-decoration: underline; }
 .uptime-seg {
   flex: 1;
   border-radius: 3px;
-  cursor: default;
+  cursor: pointer;
   transition: opacity 0.15s;
 }
 .uptime-seg:hover    { opacity: 0.75; }
@@ -230,3 +230,63 @@ a:hover { text-decoration: underline; }
   font-size: 0.65rem;
   color: var(--text-muted);
 }
+
+/* ─── Day Detail (hourly drill-down) ────────────────────────────────────── */
+.day-detail { margin-top: 2px; }
+.day-detail-panel {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.day-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.day-detail-title {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.day-detail-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 0.1rem;
+}
+.day-detail-close:hover { color: var(--text); }
+.hourly-bar-segments {
+  display: flex;
+  gap: 2px;
+  height: 32px;
+}
+.hourly-seg {
+  flex: 1;
+  border-radius: 2px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+.hourly-seg:hover { opacity: 0.75; }
+.hourly-seg--up      { background: var(--up); }
+.hourly-seg--down    { background: var(--down); }
+.hourly-seg--no-data { background: var(--surface-2); border: 1px solid var(--border); }
+.hourly-seg-label {
+  position: absolute;
+  bottom: -14px;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.hourly-bar-segments { margin-bottom: 16px; }
